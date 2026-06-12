@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ListType {
+  PRESENCE
+  UNIFORM
+}
+
+enum ListStatus {
+  OPEN
+  CLOSED
+}
+
+enum UniformSize {
+  P
+  M
+  G
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lists        RaceList[]
+}
+
+model RaceList {
+  id              String          @id @default(cuid())
+  title           String
+  description     String
+  type            ListType
+  status          ListStatus      @default(OPEN)
+  publicToken     String          @unique
+  closeAt         DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  createdById     String
+  createdBy       AdminUser       @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  presenceEntries PresenceEntry[]
+  uniformOrders   UniformOrder[]
+
+  @@index([createdById, createdAt])
+  @@index([status, type])
+}
+
+model PresenceEntry {
+  id              String   @id @default(cuid())
+  raceListId      String
+  raceList        RaceList @relation(fields: [raceListId], references: [id], onDelete: Cascade)
+  name            String
+  phone           String
+  phoneNormalized String
+  createdAt       DateTime @default(now())
+
+  @@unique([raceListId, phoneNormalized])
+  @@index([raceListId, createdAt])
+}
+
+model UniformOrder {
+  id              String      @id @default(cuid())
+  raceListId      String
+  raceList        RaceList    @relation(fields: [raceListId], references: [id], onDelete: Cascade)
+  name            String
+  phone           String
+  phoneNormalized String
+  itemType        String
+  size            UniformSize
+  note            String?
+  createdAt       DateTime    @default(now())
+
+  @@unique([raceListId, phoneNormalized])
+  @@index([raceListId, createdAt])
+}

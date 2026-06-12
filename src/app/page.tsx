@@ -1,65 +1,88 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-4 sm:px-6 lg:px-8">
+      <section className="grid overflow-hidden rounded-[36px] border border-black/8 bg-white/80 shadow-[0_28px_90px_rgba(20,31,24,0.12)] backdrop-blur lg:grid-cols-[1.12fr_0.88fr]">
+        <div className="bg-[var(--color-ink)] px-6 py-10 text-white sm:px-10 sm:py-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/58">
+            Quarteto List
           </p>
+          <h1 className="mt-6 max-w-2xl font-display text-4xl leading-tight sm:text-6xl">
+            Listas públicas para equipes de corrida, sem caos de WhatsApp.
+          </h1>
+          <p className="mt-6 max-w-xl text-sm leading-7 text-white/72 sm:text-base">
+            O administrador cria a lista, compartilha um link e acompanha presença ou pedidos de
+            uniforme com duplicidade bloqueada, status de abertura e exportação pronta para o staff.
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--color-accent)] px-6 text-sm font-semibold text-white transition hover:opacity-92"
+              href="/login"
+            >
+              Entrar no painel
+            </Link>
+            <a
+              className="inline-flex h-12 items-center justify-center rounded-full border border-white/12 px-6 text-sm font-semibold text-white transition hover:bg-white/8"
+              href="#visao-geral"
+            >
+              Ver como funciona
+            </a>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid gap-4 bg-[var(--color-shell)]/66 px-6 py-10 sm:px-10 sm:py-12">
+          <div className="rounded-[28px] border border-black/8 bg-white/85 p-6 shadow-[0_18px_40px_rgba(20,31,24,0.06)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.28em] text-black/40">
+              Fluxo administrativo
+            </div>
+            <h2 className="mt-3 text-2xl font-semibold text-[var(--color-ink)]">
+              Criar, fechar e exportar
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-black/58">
+              Dashboard único para abrir listas, acompanhar registros, encerrar manualmente e gerar
+              PDF por tipo.
+            </p>
+          </div>
+          <div className="rounded-[28px] border border-black/8 bg-white/85 p-6 shadow-[0_18px_40px_rgba(20,31,24,0.06)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.28em] text-black/40">
+              Fluxo público
+            </div>
+            <h2 className="mt-3 text-2xl font-semibold text-[var(--color-ink)]">
+              Link simples e direto
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-black/58">
+              O atleta só abre o link, informa os dados exigidos e recebe feedback imediato, sem
+              precisar de login.
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3" id="visao-geral">
+        <article className="rounded-[28px] border border-black/8 bg-white/78 p-6 shadow-[0_18px_40px_rgba(20,31,24,0.06)] backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-black/40">RF006</p>
+          <h3 className="mt-3 text-xl font-semibold text-[var(--color-ink)]">Presença</h3>
+          <p className="mt-3 text-sm leading-7 text-black/58">
+            Formulário enxuto com nome e telefone, pronto para confirmar quem vai à corrida.
+          </p>
+        </article>
+        <article className="rounded-[28px] border border-black/8 bg-white/78 p-6 shadow-[0_18px_40px_rgba(20,31,24,0.06)] backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-black/40">RF009</p>
+          <h3 className="mt-3 text-xl font-semibold text-[var(--color-ink)]">Uniforme</h3>
+          <p className="mt-3 text-sm leading-7 text-black/58">
+            Pedido com tipo livre, tamanho e observação opcional, além de encerramento por data.
+          </p>
+        </article>
+        <article className="rounded-[28px] border border-black/8 bg-white/78 p-6 shadow-[0_18px_40px_rgba(20,31,24,0.06)] backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-black/40">RF012</p>
+          <h3 className="mt-3 text-xl font-semibold text-[var(--color-ink)]">PDF</h3>
+          <p className="mt-3 text-sm leading-7 text-black/58">
+            Exportação separada por tipo de lista para compartilhar com organização, costura ou staff.
+          </p>
+        </article>
+      </section>
+    </main>
   );
 }

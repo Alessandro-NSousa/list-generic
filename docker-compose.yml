@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quarteto-list-postgres
+    environment:
+      POSTGRES_DB: quarteto_list
+      POSTGRES_PASSWORD: quarteto
+      POSTGRES_USER: quarteto
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quarteto -d quarteto_list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - quarteto_list_postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      args:
+        DATABASE_URL: postgresql://quarteto:quarteto@postgres:5432/quarteto_list
+        AUTH_SECRET: quarteto-list-build-secret
+        CRON_SECRET: quarteto-list-build-cron-secret
+    container_name: quarteto-list-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://quarteto:quarteto@postgres:5432/quarteto_list
+      AUTH_SECRET: ${AUTH_SECRET:-quarteto-list-dev-secret-change-me}
+      CRON_SECRET: ${CRON_SECRET:-quarteto-list-dev-cron-secret}
+      APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@quartetolist.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123456}
+    ports:
+      - "3000:3000"
+    command: sh -c "npm run db:push && npm run db:seed && npm run start"
+
+volumes:
+  quarteto_list_postgres_data:

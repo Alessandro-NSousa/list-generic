@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Quarteto List
 
-## Getting Started
+Aplicação full-stack em Next.js para gerenciar listas públicas de equipes de corrida.
 
-First, run the development server:
+## O que já está implementado
+
+- Login administrativo com sessão segura em cookie.
+- Dashboard para criar e listar listas.
+- Página pública por link para confirmação de presença.
+- Página pública por link para pedido de uniforme.
+- Bloqueio de duplicidade por telefone na mesma lista.
+- Encerramento manual de listas.
+- Encerramento automático de listas de uniforme por data.
+- Exportação de lista em PDF.
+
+## Stack
+
+- Next.js 16 com App Router
+- React 19
+- TypeScript
+- PostgreSQL
+- Prisma ORM
+- Zod para validação
+- @react-pdf/renderer para geração de PDF
+
+## Variáveis de ambiente
+
+Copie .env.example para .env e ajuste os valores locais.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="postgresql://quarteto:quarteto@localhost:5432/quarteto_list"
+AUTH_SECRET="troque-por-um-segredo-longo"
+CRON_SECRET="troque-por-um-segredo-longo"
+ADMIN_NAME="Administrador"
+ADMIN_EMAIL="admin@quartetolist.local"
+ADMIN_PASSWORD="admin123456"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Rodando localmente sem Docker
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Suba um PostgreSQL local.
+2. Instale as dependências.
+3. Gere o client do Prisma.
+4. Aplique o schema.
+5. Crie o administrador inicial.
+6. Inicie a aplicação.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run db:generate
+npm run db:push
+npm run db:seed
+npm run dev
+```
 
-## Learn More
+Aplicação: http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+Login inicial padrão em desenvolvimento:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- E-mail: admin@quartetolist.local
+- Senha: admin123456
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Rodando com Docker Compose
 
-## Deploy on Vercel
+```bash
+docker compose up --build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Esse fluxo sobe:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- PostgreSQL em localhost:5432
+- Aplicação em http://localhost:3000
+
+Na subida do container web, o projeto executa automaticamente:
+
+- npm run db:push
+- npm run db:seed
+
+## Endpoints operacionais
+
+- PDF por lista: /api/lists/:id/export
+- Cron de fechamento automático: /api/cron/close-uniform-lists
+
+Para acionar o cron em produção, envie o header:
+
+```text
+Authorization: Bearer <CRON_SECRET>
+```
+
+## Deploy simples em PaaS
+
+Recomendação para o MVP:
+
+1. Subir um PostgreSQL gerenciado.
+2. Configurar DATABASE_URL, AUTH_SECRET, CRON_SECRET, APP_URL e NEXT_PUBLIC_APP_URL.
+3. Fazer deploy do Dockerfile.
+4. Configurar um scheduler HTTP para chamar /api/cron/close-uniform-lists.
+
+## Próximos passos sugeridos
+
+- Adicionar migrações versionadas do Prisma a partir de um banco local.
+- Cobrir os fluxos com testes E2E.
+- Refinar edição administrativa de listas e reabertura com ajuste explícito da data.
