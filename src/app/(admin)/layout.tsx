@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { logoutAction } from "@/app/(admin)/actions";
+import { AppLogo } from "@/components/app-logo";
 import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminLayout({
@@ -16,9 +17,7 @@ export default async function AdminLayout({
         <header className="border-b border-black/8 px-5 py-5 sm:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-black/45">
-                Quarteto List
-              </p>
+              <AppLogo className="w-fit" width={180} />
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <h1 className="font-display text-2xl text-[var(--color-ink)]">
                   Painel administrativo

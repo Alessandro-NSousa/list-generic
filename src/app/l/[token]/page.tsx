@@ -10,6 +10,7 @@ import {
 } from "@/lib/list-service";
 import { getSearchParamValue } from "@/lib/search-params";
 
+import { AppLogo } from "@/components/app-logo";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/submit-button";
 
@@ -65,9 +66,7 @@ export default async function PublicListPage({
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-black/40">
-                Quarteto List
-              </p>
+              <AppLogo className="w-fit" width={180} />
               <StatusBadge closed={closed} />
             </div>
 

@@ -5,6 +5,7 @@ import { loginAction } from "@/app/login/actions";
 import { getCurrentAdmin } from "@/lib/auth";
 import { getSearchParamValue } from "@/lib/search-params";
 
+import { AppLogo } from "@/components/app-logo";
 import { SubmitButton } from "@/components/submit-button";
 
 const fieldClassName =
@@ -32,9 +33,7 @@ export default async function LoginPage({
     <main className="flex min-h-screen items-center justify-center px-4 py-4 sm:px-6 lg:px-8">
       <div className="grid w-full max-w-6xl overflow-hidden rounded-[36px] border border-black/8 bg-white/80 shadow-[0_28px_90px_rgba(20,31,24,0.12)] backdrop-blur lg:grid-cols-[1.15fr_0.85fr]">
         <section className="bg-[var(--color-ink)] px-6 py-8 text-white sm:px-10 sm:py-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/58">
-            Quarteto List
-          </p>
+          <AppLogo className="w-fit" priority width={240} />
           <h1 className="mt-5 max-w-xl font-display text-4xl leading-tight sm:text-5xl">
             Listas de corrida simples de preencher e fáceis de operar.
           </h1>

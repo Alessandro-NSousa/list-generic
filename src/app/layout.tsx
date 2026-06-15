@@ -14,8 +14,8 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "Quarteto List",
-    template: "%s | Quarteto List",
+    default: "Quarteto Fantastico",
+    template: "%s | Quarteto Fantastico",
   },
   description:
     "Gerencie listas públicas de presença e uniforme para equipes de corrida com um painel administrativo simples.",
