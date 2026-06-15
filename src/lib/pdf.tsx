@@ -67,14 +67,6 @@ type RaceListPdfProps = {
   list: ExportList;
 };
 
-function summaryLabel(list: ExportList) {
-  return list.type === "PRESENCE" ? "Confirmação de presença" : "Lista de uniforme";
-}
-
-function rowsCount(list: ExportList) {
-  return list.type === "PRESENCE" ? list.presenceEntries.length : list.uniformOrders.length;
-}
-
 function renderPresenceTable(list: ExportList) {
   return (
     <View>
@@ -126,20 +118,10 @@ export function RaceListPdf({ generatedAt, list }: RaceListPdfProps) {
     <Document title={list.title}>
       <Page size="A4" style={styles.page}>
         <View style={styles.card}>
-          <Text style={styles.label}>Quarteto List</Text>
+          <Text style={styles.label}>Quarteto Fantastico</Text>
           <Text style={styles.headerTitle}>{list.title}</Text>
           <Text style={styles.bodyText}>{list.description}</Text>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Resumo</Text>
-          <Text style={styles.bodyText}>Tipo: {summaryLabel(list)}</Text>
           <Text style={styles.bodyText}>Gerado em: {formatDateTime(generatedAt)}</Text>
-          <Text style={styles.bodyText}>Status: {list.status === "OPEN" ? "Aberta" : "Encerrada"}</Text>
-          <Text style={styles.bodyText}>Registros: {rowsCount(list)}</Text>
-          {list.type === "UNIFORM" && list.closeAt ? (
-            <Text style={styles.bodyText}>Encerramento programado: {formatDateTime(list.closeAt)}</Text>
-          ) : null}
         </View>
 
         <View>

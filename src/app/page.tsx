@@ -1,13 +1,13 @@
 import Link from "next/link";
 
+import { AppLogo } from "@/components/app-logo";
+
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-4 sm:px-6 lg:px-8">
       <section className="grid overflow-hidden rounded-[36px] border border-black/8 bg-white/80 shadow-[0_28px_90px_rgba(20,31,24,0.12)] backdrop-blur lg:grid-cols-[1.12fr_0.88fr]">
         <div className="bg-[var(--color-ink)] px-6 py-10 text-white sm:px-10 sm:py-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/58">
-            Quarteto List
-          </p>
+          <AppLogo className="w-fit" priority width={260} />
           <h1 className="mt-6 max-w-2xl font-display text-4xl leading-tight sm:text-6xl">
             Listas públicas para equipes de corrida, sem caos de WhatsApp.
           </h1>
