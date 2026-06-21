@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { createListAction } from "@/app/(admin)/actions";
+import { createListAction, updateListStatusAction } from "@/app/(admin)/actions";
 import { requireAdmin } from "@/lib/auth";
-import { formatDate, formatDateTime } from "@/lib/dates";
+import { formatDate, formatDateTime, isExpired } from "@/lib/dates";
 import { getDashboardLists, isEffectivelyClosed } from "@/lib/list-service";
 import { getSearchParamValue } from "@/lib/search-params";
 import { getPublicListUrl } from "@/lib/urls";
@@ -18,12 +18,16 @@ const textareaClassName =
 
 const successMessages: Record<string, string> = {
   "list-created": "Lista criada com sucesso e pronta para compartilhamento.",
+  "list-closed": "A lista foi encerrada manualmente.",
+  "list-reopened": "A lista foi reaberta com sucesso.",
 };
 
 const errorMessages: Record<string, string> = {
   "invalid-close-date": "Informe uma data de encerramento futura para a lista de uniforme.",
   "invalid-list": "Revise os campos da lista antes de salvar.",
+  "invalid-status": "A ação solicitada é inválida para esta lista.",
   "list-not-found": "A lista solicitada não foi encontrada.",
+  "reopen-not-allowed": "Apenas listas de uniforme podem ser reabertas.",
 };
 
 export default async function DashboardPage({
@@ -176,6 +180,7 @@ export default async function DashboardPage({
             <div className="grid gap-4 lg:grid-cols-2">
               {lists.map((list) => {
                 const closed = isEffectivelyClosed(list);
+                const requiresNewCloseDate = list.type === "UNIFORM" && isExpired(list.closeAt);
                 const totalEntries =
                   list.type === "PRESENCE"
                     ? list._count.presenceEntries
@@ -248,6 +253,51 @@ export default async function DashboardPage({
                       >
                         Abrir página pública
                       </a>
+                    </div>
+
+                    <div className="mt-4 rounded-3xl border border-black/6 bg-[var(--color-shell)]/55 p-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.24em] text-black/40">
+                        Ações rápidas
+                      </div>
+
+                      {closed ? (
+                        list.type === "UNIFORM" ? (
+                          <form action={updateListStatusAction} className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+                            <input name="listId" type="hidden" value={list.id} />
+                            <input name="intent" type="hidden" value="reopen" />
+                            <input name="redirectTo" type="hidden" value="/dashboard" />
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-black/70" htmlFor={`dashboard-closeDate-${list.id}`}>
+                                Nova data de encerramento
+                              </label>
+                              <input
+                                className={fieldClassName}
+                                defaultValue={requiresNewCloseDate ? "" : list.closeAt?.toISOString().slice(0, 10)}
+                                id={`dashboard-closeDate-${list.id}`}
+                                name="closeDate"
+                                required={requiresNewCloseDate}
+                                type="date"
+                              />
+                            </div>
+                            <div className="flex items-end">
+                              <SubmitButton className="w-full" pendingLabel="Reabrindo...">
+                                Reabrir
+                              </SubmitButton>
+                            </div>
+                          </form>
+                        ) : (
+                          <p className="mt-3 text-sm leading-6 text-black/55">
+                            Esta lista está encerrada e não aceita reabertura rápida no dashboard.
+                          </p>
+                        )
+                      ) : (
+                        <form action={updateListStatusAction} className="mt-3">
+                          <input name="listId" type="hidden" value={list.id} />
+                          <input name="intent" type="hidden" value="close" />
+                          <input name="redirectTo" type="hidden" value="/dashboard" />
+                          <SubmitButton pendingLabel="Encerrando...">Encerrar lista</SubmitButton>
+                        </form>
+                      )}
                     </div>
                   </article>
                 );

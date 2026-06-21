@@ -7,6 +7,7 @@ import { generatePublicToken } from "@/lib/tokens";
 import type {
   CreateListInput,
   PresenceEntryInput,
+  UpdateListInput,
   UniformOrderInput,
 } from "@/lib/validators";
 
@@ -23,7 +24,8 @@ export class ListServiceError extends Error {
       | "INVALID_CLOSE_DATE"
       | "LIST_CLOSED"
       | "NOT_FOUND"
-      | "REOPEN_NOT_ALLOWED",
+      | "REOPEN_NOT_ALLOWED"
+      | "TYPE_CHANGE_NOT_ALLOWED",
   ) {
     super(code);
   }
@@ -159,6 +161,39 @@ export async function createRaceList(input: CreateListInput, adminId: string) {
       publicToken: generatePublicToken(),
       title: input.title,
       type: input.type,
+    },
+  });
+}
+
+export async function updateRaceList(id: string, input: UpdateListInput, adminId: string) {
+  const list = await getRaceListForAdmin(id, adminId);
+
+  const hasEntries = list._count.presenceEntries + list._count.uniformOrders > 0;
+
+  if (input.type !== list.type && hasEntries) {
+    throw new ListServiceError("TYPE_CHANGE_NOT_ALLOWED");
+  }
+
+  const nextType = input.type;
+
+  const closeAt =
+    nextType === "UNIFORM"
+      ? parseCloseDateInput(input.closeDate)
+      : null;
+
+  if (nextType === "UNIFORM" && (!closeAt || isExpired(closeAt))) {
+    throw new ListServiceError("INVALID_CLOSE_DATE");
+  }
+
+  return prisma.raceList.update({
+    where: {
+      id: list.id,
+    },
+    data: {
+      closeAt,
+      description: input.description,
+      title: input.title,
+      type: nextType,
     },
   });
 }
