@@ -36,6 +36,30 @@ export const createListSchema = z
     }
   });
 
+export const updateListSchema = z
+  .object({
+    title: z.string().trim().min(3, "Informe um título com ao menos 3 caracteres.").max(80),
+    description: z
+      .string()
+      .trim()
+      .min(5, "Informe uma descrição com ao menos 5 caracteres.")
+      .max(300),
+    closeDate: z
+      .string()
+      .optional()
+      .transform((value) => value?.trim() || undefined),
+    type: listTypeSchema,
+  })
+  .superRefine((value, ctx) => {
+    if (value.type === "UNIFORM" && !value.closeDate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["closeDate"],
+        message: "Informe a data de encerramento da lista de uniforme.",
+      });
+    }
+  });
+
 const participantName = z
   .string()
   .trim()
@@ -73,5 +97,6 @@ export const uniformOrderSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateListInput = z.infer<typeof createListSchema>;
+export type UpdateListInput = z.infer<typeof updateListSchema>;
 export type PresenceEntryInput = z.infer<typeof presenceEntrySchema>;
 export type UniformOrderInput = z.infer<typeof uniformOrderSchema>;

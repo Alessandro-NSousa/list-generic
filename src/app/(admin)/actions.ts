@@ -9,8 +9,9 @@ import {
   createRaceList,
   ListServiceError,
   reopenRaceList,
+  updateRaceList,
 } from "@/lib/list-service";
-import { createListSchema } from "@/lib/validators";
+import { createListSchema, updateListSchema } from "@/lib/validators";
 
 function readFormValue(formData: FormData, field: string) {
   const value = formData.get(field);
@@ -56,6 +57,11 @@ export async function updateListStatusAction(formData: FormData) {
   const closeDate = readFormValue(formData, "closeDate");
   const listId = readFormValue(formData, "listId");
   const intent = readFormValue(formData, "intent");
+  const redirectToDashboard = readFormValue(formData, "redirectTo") === "/dashboard";
+
+  const listDetailsPath = `/lists/${listId}`;
+  const successBasePath = redirectToDashboard ? "/dashboard" : listDetailsPath;
+  const errorBasePath = redirectToDashboard ? "/dashboard" : listDetailsPath;
 
   if (!listId) {
     redirect("/dashboard?error=list-not-found");
@@ -63,18 +69,67 @@ export async function updateListStatusAction(formData: FormData) {
 
   try {
     if (intent === "close") {
-      await closeRaceList(listId, admin.id);
+      const updatedList = await closeRaceList(listId, admin.id);
       revalidatePath("/dashboard");
-      revalidatePath(`/lists/${listId}`);
-      redirect(`/lists/${listId}?success=list-closed`);
+      revalidatePath(listDetailsPath);
+      revalidatePath(`/l/${updatedList.publicToken}`);
+      redirect(`${successBasePath}?success=list-closed`);
     }
 
     if (intent === "reopen") {
-      await reopenRaceList(listId, admin.id, closeDate);
+      const updatedList = await reopenRaceList(listId, admin.id, closeDate);
       revalidatePath("/dashboard");
-      revalidatePath(`/lists/${listId}`);
-      redirect(`/lists/${listId}?success=list-reopened`);
+      revalidatePath(listDetailsPath);
+      revalidatePath(`/l/${updatedList.publicToken}`);
+      redirect(`${successBasePath}?success=list-reopened`);
     }
+  } catch (error) {
+    if (error instanceof ListServiceError) {
+      if (error.code === "INVALID_CLOSE_DATE") {
+        redirect(`${errorBasePath}?error=invalid-close-date`);
+      }
+
+      if (error.code === "NOT_FOUND") {
+        redirect("/dashboard?error=list-not-found");
+      }
+
+      if (error.code === "REOPEN_NOT_ALLOWED") {
+        redirect(`${errorBasePath}?error=reopen-not-allowed`);
+      }
+    }
+
+    throw error;
+  }
+
+  redirect(`${errorBasePath}?error=invalid-status`);
+}
+
+export async function updateListAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const listId = readFormValue(formData, "listId");
+  const type = readFormValue(formData, "type");
+
+  if (!listId) {
+    redirect("/dashboard?error=list-not-found");
+  }
+
+  const parsedInput = updateListSchema.safeParse({
+    closeDate: readFormValue(formData, "closeDate"),
+    description: readFormValue(formData, "description"),
+    title: readFormValue(formData, "title"),
+    type,
+  });
+
+  if (!parsedInput.success) {
+    redirect(`/lists/${listId}?error=invalid-list`);
+  }
+
+  try {
+    const updatedList = await updateRaceList(listId, parsedInput.data, admin.id);
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/lists/${listId}`);
+    revalidatePath(`/l/${updatedList.publicToken}`);
   } catch (error) {
     if (error instanceof ListServiceError) {
       if (error.code === "INVALID_CLOSE_DATE") {
@@ -85,13 +140,13 @@ export async function updateListStatusAction(formData: FormData) {
         redirect("/dashboard?error=list-not-found");
       }
 
-      if (error.code === "REOPEN_NOT_ALLOWED") {
-        redirect(`/lists/${listId}?error=reopen-not-allowed`);
+      if (error.code === "TYPE_CHANGE_NOT_ALLOWED") {
+        redirect(`/lists/${listId}?error=type-change-not-allowed`);
       }
     }
 
     throw error;
   }
 
-  redirect(`/lists/${listId}?error=invalid-status`);
+  redirect(`/lists/${listId}?success=list-updated`);
 }

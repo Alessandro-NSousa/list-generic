@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { updateListStatusAction } from "@/app/(admin)/actions";
+import { updateListAction, updateListStatusAction } from "@/app/(admin)/actions";
 import { requireAdmin } from "@/lib/auth";
 import { formatDate, formatDateTime, isExpired } from "@/lib/dates";
 import {
@@ -21,12 +21,15 @@ const fieldClassName =
 const successMessages: Record<string, string> = {
   "list-closed": "A lista foi encerrada manualmente.",
   "list-reopened": "A lista foi reaberta com sucesso.",
+  "list-updated": "As alterações da lista foram salvas.",
 };
 
 const errorMessages: Record<string, string> = {
   "invalid-close-date": "Informe uma nova data futura para reabrir a lista de uniforme.",
+  "invalid-list": "Revise os campos antes de salvar as alterações da lista.",
   "invalid-status": "A ação solicitada é inválida para esta lista.",
   "reopen-not-allowed": "Apenas listas de uniforme podem ser reabertas.",
+  "type-change-not-allowed": "O tipo só pode ser alterado antes de existir qualquer registro na lista.",
 };
 
 export default async function ListDetailsPage({
@@ -56,6 +59,7 @@ export default async function ListDetailsPage({
   const errorMessage = errorMessages[getSearchParamValue(resolvedSearchParams.error) ?? ""];
   const publicUrl = getPublicListUrl(list.publicToken);
   const requiresNewCloseDate = list.type === "UNIFORM" && isExpired(list.closeAt);
+  const hasEntries = list._count.presenceEntries + list._count.uniformOrders > 0;
 
   return (
     <div className="space-y-6">
@@ -149,6 +153,100 @@ export default async function ListDetailsPage({
             {errorMessage}
           </div>
         ) : null}
+
+        <div className="mt-6 rounded-[28px] border border-black/8 bg-white/75 p-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-black/38">
+              Edição da lista
+            </p>
+            <h3 className="mt-2 text-xl font-semibold text-[var(--color-ink)]">
+              Atualizar dados principais
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-black/58">
+              Ajuste título, descrição e data de encerramento. O tipo também pode ser alterado,
+              mas apenas antes da lista receber o primeiro registro.
+            </p>
+          </div>
+
+          <form action={updateListAction} className="mt-5 space-y-4">
+            <input name="listId" type="hidden" value={list.id} />
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-black/70" htmlFor="title">
+                Título
+              </label>
+              <input
+                className={fieldClassName}
+                defaultValue={list.title}
+                id="title"
+                name="title"
+                required
+                type="text"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-black/70" htmlFor="description">
+                Descrição
+              </label>
+              <textarea
+                className="min-h-28 w-full rounded-3xl border border-black/10 bg-white/90 px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition placeholder:text-black/32 focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent-soft)]/60"
+                defaultValue={list.description}
+                id="description"
+                name="description"
+                required
+              />
+            </div>
+
+            <div className="space-y-2 sm:max-w-xs">
+              <label className="text-sm font-medium text-black/70" htmlFor="type">
+                Tipo da lista
+              </label>
+              <select
+                className={fieldClassName}
+                defaultValue={list.type}
+                disabled={hasEntries}
+                id="type"
+                name="type"
+              >
+                <option value="PRESENCE">Confirmação de presença</option>
+                <option value="UNIFORM">Lista de uniforme</option>
+              </select>
+              {hasEntries ? (
+                <>
+                  <input name="type" type="hidden" value={list.type} />
+                  <p className="text-xs leading-6 text-black/45">
+                    O tipo fica bloqueado porque a lista já possui registros.
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs leading-6 text-black/45">
+                  Sem registros, você ainda pode converter entre presença e uniforme.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2 sm:max-w-xs">
+              <label className="text-sm font-medium text-black/70" htmlFor="editCloseDate">
+                Data de encerramento
+              </label>
+              <input
+                className={fieldClassName}
+                defaultValue={list.closeAt ? list.closeAt.toISOString().slice(0, 10) : ""}
+                id="editCloseDate"
+                name="closeDate"
+                type="date"
+              />
+              <p className="text-xs leading-6 text-black/45">
+                Obrigatória para listas de uniforme e ignorada nas listas de presença.
+              </p>
+            </div>
+
+            <div className="flex justify-end">
+              <SubmitButton pendingLabel="Salvando alterações...">Salvar alterações</SubmitButton>
+            </div>
+          </form>
+        </div>
 
         <div className="mt-6 flex flex-col gap-4 rounded-[28px] border border-black/8 bg-white/75 p-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
